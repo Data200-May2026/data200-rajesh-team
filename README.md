@@ -1,89 +1,50 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/GmDRGx2S)
-# Data 200 Applied Statistical Analysis  
-## Project Work  
-**“Exploring Real-World Data through Statistical and Predictive Modeling”**
+# NPL 2025 Match Outcome Predictor
 
----
+This project analyzes Nepal Premier League match data and provides a simple Streamlit app for predicting match winners from match features.
 
-### Objective:  
-Students will apply statistical and predictive modeling techniques to analyze a real-world dataset relevant to their areas of interest (e.g., Healthcare, Marketing, Sports, Finance, Education, etc.). The project will focus on:  
-- Cleaning and structuring data.  
-- Applying statistical analysis techniques such as Linear Regression, ANOVA, or Logistic Regression.  
-- Developing a simple end-to-end application.  
-- Generating a comprehensive report to document choices, insights, and conclusions.  
+## Project structure
 
----
+- `NPL2025/data_loader.py` - loads Cricsheet-style CSV match files into match and delivery tables.
+- `NPL2025/model.py` - runs the statistical analysis, trains the logistic regression model, and saves outputs.
+- `NPL2025/app.py` - Streamlit app for interactive winner prediction.
+- `NPL2025/outputs/` - generated CSV files, plots, and the trained model.
+- `*.csv` in the repository root - raw match data.
 
-### Deliverables and Deadlines  
+## What it does
 
-#### **Week 1: Group Formation and Topic Finalization**  
-- Form project groups.
-- Finalize the project topic.
-- Identify the problem statement.  
+- Loads and cleans match data.
+- Performs statistical analysis such as chi-square testing, ANOVA, and logistic regression.
+- Saves model artifacts and diagnostic plots.
+- Lets you predict the likely winner using Streamlit.
 
-**Deliverables:**  
-- Idea presentation.  
+## Requirements
 
-#### **Week 2: Literature Review and Dataset Selection**  
-- Conduct a literature review to establish context and relevance.  
-- Select a suitable dataset.  
+Python 3.11+ and these libraries:
 
-**Deliverables:**  
-- Submit at least 3 literature reviews of related works.  
+- pandas
+- matplotlib
+- seaborn
+- scipy
+- scikit-learn
+- statsmodels
+- streamlit
 
-#### **Week 3: Exploratory Data Analysis (EDA)**  
-- Perform EDA using descriptive statistics and visualizations to understand data patterns and relationships.  
-- Preprocess the data: Handle missing values, outliers, and duplicates, and perform other data wrangling techniques.  
-- Check relationships in data
+## How to run
 
-**Deliverables:**  
-- EDA summary with key insights supported by visualizations (e.g., scatter plots, histograms, box plots).  
+### 1. Generate the processed data and model
 
-#### **Week 4: Statistical Model Selection and Hypothesis Development**  
-- Select appropriate statistical techniques (e.g., Regression, ANOVA, Logistic Regression) based on the problem statement.  
-- Perform feature selection and develop hypotheses.  
+```powershell
+python NPL2025\data_loader.py
+python NPL2025\model.py
+```
 
-**Deliverables:**  
-- A short slide deck with justification of model and feature choices.  
+### 2. Start the app
 
-#### **Week 5: Statistical Analysis and Validation**  
-- Conduct descriptive and inferential statistical analysis tests using Python.  
-- Perform diagnostics measures
-- Interpret results and validate hypotheses.  
-- If necessary, choose sampling methods or collect additional data (e.g., through questionnaires or Google Forms).  
+```powershell
+streamlit run NPL2025\app.py
+```
 
----
-#### **Week 6: Statistical Modeling (Continued…)**  
-- Build on the analysis from Week 5.  
-- Finalize insights and begin compiling the project report.  
+## Notes
 
-**Deliverables:**  
-- Present statistical analysis results and insights.  
-- Also, present the report draft for progress tracking.  
-
-#### **Week 7: Application Development**  
-- Simple Python Application Creation for project demonstration using libraries of student’s choice.  
-
-**Deliverables:**  
-- Locally running Python application.  
-
-#### **Week 8: Peer Evaluation and Final Presentation**  
-- Conduct peer evaluations (review at least two projects).  
-- Prepare and present findings in a 10-minute presentation.  
-- Submit the final report with documentation.  
-
-**Deliverables:**  
-- Final report with detailed documentation.  
-- Presentation slides.  
-- Peer evaluation feedback.  
-
----
-
-### Evaluation Criteria  
-- **Dataset and Problem Definition (10%)**  
-- **Exploratory Data Analysis and Preprocessing (20%)**  
-- **Statistical Modeling and Validation (40%)**  
-- **Python Application Development (10%)**  
-- **Presentation and Collaboration (20%)**
-
----
+- The app expects `NPL2025/outputs/logistic_regression_model.pkl` to exist.
+- The raw CSV files in the repository root are used to build the processed datasets in `NPL2025/outputs/`.
