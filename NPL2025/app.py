@@ -55,7 +55,6 @@ def main() -> None:
     st.title("NPL 2025 Match Outcome Predictor")
     st.caption("Predicts whether the batting side or bowling side is more likely to win based on match features.")
 
-
     if not MODEL_PATH.exists():
         st.error("Trained model not found. Run `python model.py` first to create `outputs/logistic_regression_model.pkl`.")
         st.stop()
@@ -93,7 +92,6 @@ def main() -> None:
         predicted_side = class_labels[predicted_class]
         predicted_probability = batting_probability if predicted_class == 1 else bowling_probability
 
-
         col1, col2 = st.columns(2)
         with col1:
             st.metric("Predicted side to win", predicted_side)
@@ -105,7 +103,6 @@ def main() -> None:
                     "Win Probability": [batting_probability, bowling_probability],
                 }
             ).set_index("Side")
-
 
             fig, ax = plt.subplots(figsize=(6, 4))
             chart_df["Win Probability"].plot(kind="bar", ax=ax, color=["#1f77b4", "#ff7f0e"])
@@ -120,6 +117,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
 
 

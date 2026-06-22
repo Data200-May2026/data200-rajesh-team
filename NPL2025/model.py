@@ -30,12 +30,24 @@ def load_match_features() -> pd.DataFrame:
     return pd.read_csv(OUTPUT_DIR / "match_features.csv")
 
 
-def add_winner_flag(df: pd.DataFrame) -> pd.DataFrame:
+def add_batting_side_flag(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
-    df["winner_flag"] = pd.NA
-    df.loc[df["winner"] == df["team1"], "winner_flag"] = 1
-    df.loc[df["winner"] == df["team2"], "winner_flag"] = 0
-    df["winner_flag"] = pd.to_numeric(df["winner_flag"], errors="coerce")
+    df["batting_team"] = pd.NA
+
+    bat_mask = df["toss_decision"].astype("string").str.lower().eq("bat")
+    field_mask = df["toss_decision"].astype("string").str.lower().eq("field")
+
+    df.loc[bat_mask, "batting_team"] = df.loc[bat_mask, "toss_winner"]
+
+    batting_team1_mask = field_mask & df["toss_winner"].eq(df["team1"])
+    batting_team2_mask = field_mask & df["toss_winner"].eq(df["team2"])
+    df.loc[batting_team1_mask, "batting_team"] = df.loc[batting_team1_mask, "team2"]
+    df.loc[batting_team2_mask, "batting_team"] = df.loc[batting_team2_mask, "team1"]
+
+    df["batting_side_flag"] = pd.NA
+    df.loc[df["winner"] == df["batting_team"], "batting_side_flag"] = 1
+    df.loc[df["winner"].notna() & df["batting_team"].notna() & (df["winner"] != df["batting_team"]), "batting_side_flag"] = 0
+    df["batting_side_flag"] = pd.to_numeric(df["batting_side_flag"], errors="coerce")
     return df
 
 
@@ -86,7 +98,7 @@ def prepare_logistic_data(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     required_columns = [
-        "winner_flag",
+        "batting_side_flag",
         "toss_decision_encoded",
         "powerplay_runs",
         "death_over_runs",
@@ -95,7 +107,7 @@ def prepare_logistic_data(df: pd.DataFrame) -> pd.DataFrame:
         "dot_ball_count",
     ]
     frame = frame[required_columns].dropna()
-    frame["winner_flag"] = frame["winner_flag"].astype(int)
+    frame["batting_side_flag"] = frame["batting_side_flag"].astype(int)
     return frame
 
 
@@ -119,7 +131,7 @@ def save_roc_curve(y_true: pd.Series, y_prob: pd.Series, output_path: Path) -> f
 def save_probability_distribution(y_true: pd.Series, y_prob: pd.Series, output_path: Path) -> None:
     plot_df = pd.DataFrame(
         {
-            "winner_flag": y_true.map({0: "Class 0", 1: "Class 1"}),
+            "batting_side_flag": y_true.map({0: "Bowling team", 1: "Batting team"}),
             "predicted_probability": y_prob,
         }
     )
@@ -128,14 +140,14 @@ def save_probability_distribution(y_true: pd.Series, y_prob: pd.Series, output_p
     sns.histplot(
         data=plot_df,
         x="predicted_probability",
-        hue="winner_flag",
+        hue="batting_side_flag",
         bins=10,
         kde=True,
         stat="density",
         common_norm=False,
         element="step",
     )
-    plt.xlabel("Predicted probability of winner_flag = 1")
+    plt.xlabel("Predicted probability of batting_side_flag = 1")
     plt.ylabel("Density")
     plt.title("Predicted Probability Distribution by Class")
     plt.tight_layout()
@@ -144,14 +156,14 @@ def save_probability_distribution(y_true: pd.Series, y_prob: pd.Series, output_p
 
 
 def main() -> None:
-    df = add_winner_flag(load_match_features())
+    df = add_batting_side_flag(load_match_features())
 
-    valid = df["winner_flag"].notna()
+    valid = df["batting_side_flag"].notna()
     if valid.sum() != len(df):
-        print(f"Dropped {len(df) - valid.sum()} rows without a valid team1/team2 winner match.")
+        print(f"Dropped {len(df) - valid.sum()} rows without a valid batting-side winner match.")
 
     df = df.loc[valid].copy()
-    df["winner_flag"] = df["winner_flag"].astype(int)
+    df["batting_side_flag"] = df["batting_side_flag"].astype(int)
 
     chi2, p_value, dof, contingency = chi_square_toss_vs_winner(df)
     print("Chi-square test for toss_winner vs winner:")
@@ -185,7 +197,7 @@ def main() -> None:
         "dot_ball_count",
     ]
     X = logistic_df[feature_columns]
-    y = logistic_df["winner_flag"]
+    y = logistic_df["batting_side_flag"]
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
@@ -199,7 +211,7 @@ def main() -> None:
             {
                 "model": model,
                 "feature_columns": feature_columns,
-                "class_labels": {0: "Team 2", 1: "Team 1"},
+                "class_labels": {0: "Bowling team", 1: "Batting team"},
             },
             handle,
         )
@@ -285,14 +297,14 @@ def main() -> None:
     print(hypothesis_summary.to_string(index=False, float_format=lambda value: f"{value:.4f}"))
     print()
 
-    numeric = df.select_dtypes(include="number").drop(columns=["match_id", "winner_flag"], errors="ignore")
+    numeric = df.select_dtypes(include="number").drop(columns=["match_id", "batting_side_flag"], errors="ignore")
     numeric = numeric.loc[:, numeric.nunique(dropna=True) > 1]
     correlation_values = {}
     for column in numeric.columns:
-        paired = df[[column, "winner_flag"]].dropna()
-        if paired[column].nunique(dropna=True) < 2 or paired["winner_flag"].nunique(dropna=True) < 2:
+        paired = df[[column, "batting_side_flag"]].dropna()
+        if paired[column].nunique(dropna=True) < 2 or paired["batting_side_flag"].nunique(dropna=True) < 2:
             continue
-        correlation_values[column] = paired[column].corr(paired["winner_flag"])
+        correlation_values[column] = paired[column].corr(paired["batting_side_flag"])
 
     correlations = pd.Series(correlation_values).sort_values(key=lambda s: s.abs(), ascending=False)
 
@@ -300,7 +312,7 @@ def main() -> None:
     vif_input = vif_input.dropna()
     vif = compute_vif(vif_input)
 
-    print("Correlation with winner_flag:")
+    print("Correlation with batting_side_flag:")
     print(correlations)
     print()
 

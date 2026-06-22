@@ -15,7 +15,7 @@ This project analyzes Nepal Premier League match data and provides a simple Stre
 - Loads and cleans match data.
 - Performs statistical analysis such as chi-square testing, ANOVA, and logistic regression.
 - Saves model artifacts and diagnostic plots.
-- Lets you predict the likely winner using Streamlit.
+- Lets you predict whether the batting side or bowling side is more likely to win using Streamlit.
 
 ## Requirements
 
