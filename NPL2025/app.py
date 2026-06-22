@@ -1,11 +1,15 @@
 """Streamlit app for NPL2025 match outcome prediction."""
 
+
 from pathlib import Path
 import pickle
+
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
+
+
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -13,9 +17,13 @@ OUTPUT_DIR = BASE_DIR / "outputs"
 MODEL_PATH = OUTPUT_DIR / "logistic_regression_model.pkl"
 
 
+
+
 def load_artifact() -> dict:
     with MODEL_PATH.open("rb") as handle:
         return pickle.load(handle)
+
+
 
 
 def build_feature_frame(
@@ -40,19 +48,24 @@ def build_feature_frame(
     )
 
 
+
+
 def main() -> None:
     st.set_page_config(page_title="NPL 2025 Match Outcome Predictor", layout="wide")
     st.title("NPL 2025 Match Outcome Predictor")
-    st.caption("Predicts whether Team 1 or Team 2 is more likely to win based on match features.")
+    st.caption("Predicts whether the batting side or bowling side is more likely to win based on match features.")
+
 
     if not MODEL_PATH.exists():
         st.error("Trained model not found. Run `python model.py` first to create `outputs/logistic_regression_model.pkl`.")
         st.stop()
 
+
     artifact = load_artifact()
     model = artifact["model"]
     feature_columns = artifact["feature_columns"]
     class_labels = artifact["class_labels"]
+
 
     st.sidebar.header("Match inputs")
     toss_decision = st.sidebar.selectbox("Toss decision", ["bat", "field"])
@@ -61,6 +74,7 @@ def main() -> None:
     total_wickets = st.sidebar.number_input("Total wickets lost", min_value=0.0, value=6.0, step=1.0)
     boundary_count = st.sidebar.number_input("Boundary count", min_value=0.0, value=15.0, step=1.0)
     dot_ball_count = st.sidebar.number_input("Dot ball count", min_value=0.0, value=45.0, step=1.0)
+
 
     features = build_feature_frame(
         toss_decision,
@@ -71,30 +85,33 @@ def main() -> None:
         dot_ball_count,
     )[feature_columns]
 
+
     if st.sidebar.button("Predict"):
-        probability_team1 = float(model.predict_proba(features)[0][1])
-        probability_team2 = 1.0 - probability_team1
+        batting_probability = float(model.predict_proba(features)[0][1])
+        bowling_probability = 1.0 - batting_probability
         predicted_class = int(model.predict(features)[0])
-        predicted_team = class_labels[predicted_class]
-        predicted_probability = probability_team1 if predicted_class == 1 else probability_team2
+        predicted_side = class_labels[predicted_class]
+        predicted_probability = batting_probability if predicted_class == 1 else bowling_probability
+
 
         col1, col2 = st.columns(2)
         with col1:
-            st.metric("Predicted winner", predicted_team)
+            st.metric("Predicted side to win", predicted_side)
             st.metric("Win probability", f"{predicted_probability * 100:.2f}%")
         with col2:
             chart_df = pd.DataFrame(
                 {
-                    "Team": ["Team 1", "Team 2"],
-                    "Win Probability": [probability_team1, probability_team2],
+                    "Side": ["Batting team", "Bowling team"],
+                    "Win Probability": [batting_probability, bowling_probability],
                 }
-            ).set_index("Team")
+            ).set_index("Side")
+
 
             fig, ax = plt.subplots(figsize=(6, 4))
             chart_df["Win Probability"].plot(kind="bar", ax=ax, color=["#1f77b4", "#ff7f0e"])
             ax.set_ylim(0, 1)
             ax.set_ylabel("Probability")
-            ax.set_title("Win Probability by Team")
+            ax.set_title("Win Probability by Side")
             ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
             st.pyplot(fig)
     else:
@@ -103,3 +120,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+
