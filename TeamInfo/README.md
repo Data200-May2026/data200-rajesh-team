@@ -1,16 +1,16 @@
-# Project Title
+# Predicting Match Outcomes in NPL
 
 ## Team Information
 
 ### Team Name
-*Replace this with your team name*
+*Team Rajesh*
 
 ### Team Members
-1. *Member 1 Name (GitHub Username)*
-2. *Member 2 Name (GitHub Username)*
-3. *Member 3 Name (GitHub Username)*
+1. *Rajesh Sunar (rajeshsunar)*
+2. *Shreeya Malla (shreeyamalla)*
+3. *Shobha Adhikari (shobha0612)*
 
 ### Task Division
-- **Member 1**: *Describe tasks assigned (e.g., data analysis and EDA)*
-- **Member 2**: *Describe tasks assigned (e.g., Model validation and creation)*
-- **Member 3**: *Describe tasks assigned (e.g., application development and data tasks)*
+- **Rajesh Sunar**: *Data analysis and EDA*
+- **Shreeya Malla**: *Model validation and creation*
+- **Shobha Adhikari**: *Data Collection and cleaning, documentation, Presentation*
