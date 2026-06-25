@@ -9,7 +9,7 @@ import streamlit as st
 
 
 BASE_DIR = Path(__file__).resolve().parent
-OUTPUT_DIR = BASE_DIR / "outputs"
+OUTPUT_DIR = BASE_DIR / "NPL2025" / "outputs"
 MODEL_PATH = OUTPUT_DIR / "logistic_regression_model.pkl"
 
 
@@ -46,7 +46,7 @@ def main() -> None:
     st.caption("Predicts whether the batting side or bowling side is more likely to win based on match features.")
 
     if not MODEL_PATH.exists():
-        st.error("Trained model not found. Run `python model.py` first to create `outputs/logistic_regression_model.pkl`.")
+        st.error("Trained model not found. Run `python NPL2025\\model.py` first to create `NPL2025\\outputs\\logistic_regression_model.pkl`.")
         st.stop()
 
     artifact = load_artifact()

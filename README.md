@@ -6,7 +6,7 @@ This project analyzes Nepal Premier League match data and provides a simple Stre
 
 - `NPL2025/data_loader.py` - loads Cricsheet-style CSV match files into match and delivery tables.
 - `NPL2025/model.py` - runs the statistical analysis, trains the logistic regression model, and saves outputs.
-- `NPL2025/app.py` - Streamlit app for interactive winner prediction.
+- `app.py` - Streamlit app for interactive winner prediction.
 - `NPL2025/outputs/` - generated CSV files, plots, and the trained model.
 - `*.csv` in the repository root - raw match data.
 
@@ -41,7 +41,7 @@ python NPL2025\model.py
 ### 2. Start the app
 
 ```powershell
-streamlit run NPL2025\app.py
+streamlit run app.py
 ```
 
 ## Notes
